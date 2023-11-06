@@ -1,4 +1,4 @@
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 
 import {
   Chart as ChartJS,
@@ -11,7 +11,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import useSWR from 'swr';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 import fetcher from '@/lib/fetcher';
 
@@ -67,6 +67,7 @@ export default function AnalyticsPage({
 }: {
   fallbackData: ApiResponse<analytics[]>;
 }) {
+  const [colors] = useState([getRandomColor(), getRandomColor()]);
   const { data, error } = useSWR<ApiResponse<analytics[]>>(
     '/api/analytics',
     fetcher,
@@ -88,7 +89,7 @@ export default function AnalyticsPage({
               data?.data.filter((item) => item.name === label && item.picked)
                 .length
           ),
-          backgroundColor: getRandomColor(),
+          backgroundColor: colors[0],
           stack: 'Stack 0',
         },
         {
@@ -98,12 +99,12 @@ export default function AnalyticsPage({
               data?.data.filter((item) => item.name === label && !item.picked)
                 .length
           ),
-          backgroundColor: getRandomColor(),
+          backgroundColor: colors[1],
           stack: 'Stack 1',
         },
       ],
     };
-  }, [data]);
+  }, [colors, data?.data]);
 
   if (error) {
     return <Layout>Failed to load</Layout>;
