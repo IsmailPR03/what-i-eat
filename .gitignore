@@ -1,4 +1,4 @@
 node_modules
+dist
 .next
-sw.js
-workbox-*.js
+.env*.local
