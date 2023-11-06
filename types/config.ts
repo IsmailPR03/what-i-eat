@@ -6,8 +6,8 @@ export type FoodConfig = {
 };
 
 export type FilterConfig = {
-  size: string;
   effort: string;
   deliverable: string;
   cheeseometer: string;
+  nutrition: string;
 };

@@ -16,15 +16,12 @@ export function searchFood(foodList: Food[], input: string) {
 
 export function filterFood(foodList: Food[], config: FilterConfig) {
   const filteredList: Food[] = [];
-  let filterSize = config.size;
   let filterEffort = config.effort;
   let filterDeliverable = config.deliverable;
   let filterCheeseometer = config.cheeseometer;
+  let filterNutrition: string | null = config.nutrition;
 
   const ignoreFilter = (food: Food) => {
-    if (config.size === '-') {
-      filterSize = food.size;
-    }
     if (config.effort === '-') {
       filterEffort = food.effort.toString();
     }
@@ -34,15 +31,19 @@ export function filterFood(foodList: Food[], config: FilterConfig) {
     if (config.cheeseometer === '-') {
       filterCheeseometer = food.cheeseometer.toString();
     }
+    if (config.nutrition === '-') {
+      filterNutrition =
+        typeof food.nutrition === 'string' ? food.nutrition : null;
+    }
   };
 
   foodList.map((food) => {
     ignoreFilter(food);
     if (
-      food.size === filterSize &&
       food.effort === Number(filterEffort) &&
       food.deliverable === (filterDeliverable === 'true') &&
-      food.cheeseometer === Number(filterCheeseometer)
+      food.cheeseometer === Number(filterCheeseometer) &&
+      food.nutrition === filterNutrition
     ) {
       filteredList.push(food);
     }

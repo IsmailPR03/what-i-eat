@@ -13,10 +13,10 @@ const UpdateFood = ({ food }: { food: Food }) => {
   const [deliverable, setDeliverable] = useState(
     food.deliverable ? 'true' : 'false'
   );
+  const [nutrition, setNutrition] = useState(food.nutrition);
   const [cheeseometer, setCheeseometer] = useState(
     food.cheeseometer.toString()
   );
-  const [size, setSize] = useState(food.size);
   const [effort, setEffort] = useState(food.effort.toString());
 
   const { mutate } = useSWRConfig();
@@ -25,25 +25,25 @@ const UpdateFood = ({ food }: { food: Food }) => {
     setName(food.name);
     setImage(food.image);
     setDeliverable(food.deliverable ? 'true' : 'false');
+    setNutrition(food.nutrition);
     setCheeseometer(food.cheeseometer.toString());
-    setSize(food.size);
     setEffort(food.effort.toString());
   }, [
     food.name,
     food.image,
     food.deliverable,
     food.cheeseometer,
-    food.size,
     food.effort,
+    food.nutrition,
   ]);
 
   async function saveFood() {
     const res = await axios.put('/api/food/update/' + food.id, {
       name: name,
       image: image,
-      size: size,
       cheeseometer: Number(cheeseometer),
       deliverable: deliverable === 'true' ? true : false,
+      nutrition: nutrition,
       effort: Number(effort),
     });
 
@@ -71,7 +71,7 @@ const UpdateFood = ({ food }: { food: Food }) => {
           <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
             <div className="relative w-auto max-w-3xl mx-auto my-6">
               {/*content*/}
-              <div className="relative flex flex-col w-full border-0 rounded-lg shadow-lg outline-none bg-gray-50 dark:bg-gray-800 focus:outline-none">
+              <div className="relative flex flex-col w-full border-0 rounded-lg shadow-lg outline-none bg-gray-50 dark:bg-gray-700 focus:outline-none">
                 {/*header*/}
                 <div className="flex items-start justify-between p-5 mx-16 border-b border-solid rounded-t border-blueGray-200">
                   <h3 className="mr-4 text-3xl font-semibold">Update food</h3>
@@ -128,20 +128,6 @@ const UpdateFood = ({ food }: { food: Food }) => {
                     </label>
                     <label className="block max-w-lg mt-2 text-left">
                       <span className="text-gray-700 dark:text-gray-300">
-                        Size
-                      </span>
-                      <select
-                        className="block w-full mt-1 form-select"
-                        onChange={(e) => setSize(e.target.value)}
-                        value={size}
-                      >
-                        <option value="1 person">1 person</option>
-                        <option value="4 people">4 people</option>
-                        <option value="all">all</option>
-                      </select>
-                    </label>
-                    <label className="block max-w-lg mt-2 text-left">
-                      <span className="text-gray-700 dark:text-gray-300">
                         Cheeseometer
                       </span>
                       <select
@@ -168,6 +154,20 @@ const UpdateFood = ({ food }: { food: Food }) => {
                       >
                         <option value="true">Yes</option>
                         <option value="false">No</option>
+                      </select>
+                    </label>
+                    <label className="block max-w-lg mt-2 text-left">
+                      <span className="text-gray-700 dark:text-gray-300">
+                        Nutrition
+                      </span>
+                      <select
+                        className="block w-full mt-1 form-select"
+                        onChange={(e) => setNutrition(e.target.value)}
+                        value={nutrition ?? ''}
+                      >
+                        <option value=""></option>
+                        <option value="Veggie">Veggie</option>
+                        <option value="Vegan">Vegan</option>
                       </select>
                     </label>
                     <label className="block max-w-lg mt-2 text-left">

@@ -21,4 +21,11 @@ export default NextAuth({
       },
     }),
   ],
+  callbacks: {
+    session: async ({ session, token }) => {
+      session.user = token;
+      session.isAdmin = token.email === process.env.ADMIN_EMAIL;
+      return session;
+    },
+  },
 });

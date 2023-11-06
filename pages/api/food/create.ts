@@ -12,12 +12,13 @@ export default async function handle(
 ) {
   const session = await getSession({ req });
 
-  if (session && session.user?.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+  if (session && !session.isAdmin) {
     res.status(401).json('Failed. Not authenticated');
     return;
   }
 
-  const { name, image, cheeseometer, size, deliverable, effort } = req.body;
+  const { name, image, cheeseometer, deliverable, nutrition, effort } =
+    req.body;
 
   if (req.method !== 'POST') {
     return res.status(405).json('Only POST method allowed');
@@ -27,9 +28,9 @@ export default async function handle(
     data: {
       name: name,
       image: image,
-      size: size,
       cheeseometer: cheeseometer,
       deliverable: deliverable,
+      nutrition: nutrition,
       effort: effort,
     },
   });

@@ -9,8 +9,8 @@ const CreateFood = () => {
   const [name, setName] = useState('');
   const [image, setImage] = useState('');
   const [deliverable, setDeliverable] = useState('true');
+  const [nutrition, setNutrition] = useState('');
   const [cheeseometer, setCheeseometer] = useState('0');
-  const [size, setSize] = useState('1 person');
   const [effort, setEffort] = useState('0');
 
   const { mutate } = useSWRConfig();
@@ -19,8 +19,8 @@ const CreateFood = () => {
     const res = await axios.post('/api/food/create', {
       name: name,
       image: image,
-      size: size,
       deliverable: deliverable === 'true' ? true : false,
+      nutrition: nutrition,
       cheeseometer: Number(cheeseometer),
       effort: Number(effort),
     });
@@ -49,7 +49,7 @@ const CreateFood = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
             <div className="relative w-auto max-w-3xl mx-auto my-6">
               {/*content*/}
-              <div className="relative flex flex-col w-full border-0 rounded-lg shadow-lg outline-none bg-gray-50 dark:bg-gray-800 focus:outline-none">
+              <div className="relative flex flex-col w-full border-0 rounded-lg shadow-lg outline-none bg-gray-50 dark:bg-gray-700 focus:outline-none">
                 {/*header*/}
                 <div className="flex items-start justify-between p-5 mx-16 border-b border-solid rounded-t border-blueGray-200">
                   <h3 className="mr-4 text-3xl font-semibold">Add food</h3>
@@ -104,19 +104,6 @@ const CreateFood = () => {
                     </label>
                     <label className="block max-w-lg mt-2 text-left">
                       <span className="text-gray-700 dark:text-gray-300">
-                        Size
-                      </span>
-                      <select
-                        className="block w-full mt-1 form-select"
-                        onChange={(e) => setSize(e.target.value)}
-                      >
-                        <option value="1 person">1 person</option>
-                        <option value="4 people">4 people</option>
-                        <option value="all">all</option>
-                      </select>
-                    </label>
-                    <label className="block max-w-lg mt-2 text-left">
-                      <span className="text-gray-700 dark:text-gray-300">
                         Cheeseometer
                       </span>
                       <select
@@ -141,6 +128,19 @@ const CreateFood = () => {
                       >
                         <option value="true">Yes</option>
                         <option value="false">No</option>
+                      </select>
+                    </label>
+                    <label className="block max-w-lg mt-2 text-left">
+                      <span className="text-gray-700 dark:text-gray-300">
+                        Nutrition
+                      </span>
+                      <select
+                        className="block w-full mt-1 form-select"
+                        onChange={(e) => setNutrition(e.target.value)}
+                      >
+                        <option value=""></option>
+                        <option value="Veggie">Veggie</option>
+                        <option value="Vegan">Vegan</option>
                       </select>
                     </label>
                     <label className="block max-w-lg mt-2 text-left">
