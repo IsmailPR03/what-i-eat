@@ -20,7 +20,7 @@ const Meta = () => {
       {mounted && (
         <meta
           name="theme-color"
-          content={theme === 'light' ? '#f9fafb' : '#111111'}
+          content={theme === 'light' ? '#f9fafb' : '#222222'}
         />
       )}
       <meta name="application-name" content="What do we eat" />
@@ -38,22 +38,22 @@ const Meta = () => {
         href="/static/icons/apple-touch-icon.png"
       />
       <link rel="manifest" href="/manifest.json" />
-      <link rel="shortcut icon" href="/static/icons/favicon.ico" />
+      <link rel="shortcut icon" href="/favicon.ico" />
       <link
         rel="icon"
         type="image/png"
         sizes="32x32"
-        href="/favicon-32x32.png"
+        href="/static/icons/favicon-32x32.png"
       />
       <link
         rel="icon"
         type="image/png"
         sizes="16x16"
-        href="/favicon-16x16.png"
+        href="/static/icons/favicon-16x16.png"
       />
       <link
         rel="preload"
-        href="static/fonts/inter-var-latin.woff2"
+        href="/static/fonts/ibm-plex-sans-var.woff2"
         as="font"
         type="font/woff2"
         crossOrigin="anonymous"

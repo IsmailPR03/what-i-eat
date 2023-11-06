@@ -6,7 +6,7 @@ export default NextAuth({
   theme: {
     colorScheme: 'auto',
     brandColor: '#c084fc',
-    logo: 'https://what-do-we-eat.vercel.app/static/icons/favicon.ico',
+    logo: 'https://what-do-we-eat.vercel.app/favicon.ico',
   },
   providers: [
     GoogleProvider({
@@ -23,8 +23,10 @@ export default NextAuth({
   ],
   callbacks: {
     session: async ({ session, token }) => {
+      token.image = token.picture;
       session.user = token;
       session.isAdmin = token.email === process.env.ADMIN_EMAIL;
+
       return session;
     },
   },

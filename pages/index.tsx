@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 import useSWR from 'swr';
+import { toast, ToastContainer, Zoom } from 'react-toastify';
 
 import type { GetStaticProps } from 'next';
+import type { favorite } from '@prisma/client';
 import type { FilterConfig, FoodConfig } from '@/types/config';
 import type { ApiResponse } from '@/types/apiResponse';
 
@@ -12,11 +14,19 @@ import fetcher from '@/lib/fetcher';
 import { handleFood } from '@/lib/filter';
 
 import Layout from '@/components/layout';
+import { useSession } from 'next-auth/react';
+import axios from 'axios';
 
 const Food = dynamic(() => import('@/components/food'));
 const Dialog = dynamic(() => import('@/components/dialog'));
 
-export default function Index({ fallbackData }: { fallbackData: ApiResponse }) {
+type Props = {
+  fallbackData: ApiResponse;
+  fallbackFavoritesData: ApiResponse<favorite[]>;
+};
+
+export default function Index({ fallbackData, fallbackFavoritesData }: Props) {
+  const { data: session } = useSession();
   const [clicked, setClicked] = useState(false);
   const [btnTitle, setBtnTitle] = useState('Get random food');
   const [foodConfig, setFoodConfig] = useState<FoodConfig>({
@@ -29,12 +39,17 @@ export default function Index({ fallbackData }: { fallbackData: ApiResponse }) {
     effort: '',
     deliverable: '',
     cheeseometer: '',
-    nutrition: '',
+    tags: '',
   });
 
   const { data, error } = useSWR<ApiResponse>('/api/food', fetcher, {
     fallbackData,
   });
+  const { data: favoriteData } = useSWR<ApiResponse<favorite[]>>(
+    '/api/food/favorite',
+    fetcher,
+    { fallbackData: fallbackFavoritesData }
+  );
 
   function handleClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -68,6 +83,29 @@ export default function Index({ fallbackData }: { fallbackData: ApiResponse }) {
     });
   }
 
+  async function submitAnalytics(picked: boolean) {
+    const res = await axios.post('/api/analytics/create', {
+      name: memoizedFoodList[0].name,
+      picked,
+    });
+
+    if (res.status !== 200) {
+      toast.error(
+        `Failed saving choice '${picked ? 'Good one' : 'Bad one'}': ${
+          res.statusText
+        }`
+      );
+      return;
+    }
+
+    toast.success(`Submitted choice '${picked ? 'Good one' : 'Bad one'}'`);
+  }
+
+  const memoizedFoodList = useMemo(
+    () => handleFood(data?.data || [], foodConfig, filter),
+    [data, foodConfig, filter]
+  );
+
   if (error) {
     return (
       <Layout>
@@ -78,16 +116,22 @@ export default function Index({ fallbackData }: { fallbackData: ApiResponse }) {
   if (!data) {
     return (
       <Layout>
-        <div className="m-10">Loading...</div>
+        <progress className="w-full progress progress-primary"></progress>
       </Layout>
     );
   }
 
   return (
     <Layout>
+      <ToastContainer
+        transition={Zoom}
+        autoClose={2500}
+        newestOnTop={true}
+        theme="colored"
+      />
       <button
         type="button"
-        className="p-2 px-5 m-3 mb-4 text-lg text-gray-100 bg-purple-600 rounded-lg hover:ring-4 ring-purple-400"
+        className="ml-3 normal-case btn btn-primary"
         onClick={handleClick}>
         {btnTitle}
       </button>
@@ -99,8 +143,22 @@ export default function Index({ fallbackData }: { fallbackData: ApiResponse }) {
         onChange={handleInput}
         type="text"
         placeholder="Search for food..."
-        className="p-2 ml-4 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline dark:bg-gray-800 dark:text-gray-300"></input>
-      <Food foodList={handleFood(data.data, foodConfig, filter)}></Food>
+        className="ml-3 text-black placeholder-black bg-white input input-bordered dark:text-white input-primary dark:bg-gray-800 dark:placeholder-white"></input>
+      {foodConfig.random && session && (
+        <div className="p-2 mb-2 ml-1">
+          <button
+            onClick={() => submitAnalytics(true)}
+            className="mr-1 text-white normal-case bg-green-600 border-none btn hover:bg-green-700 ring-green-400 hover:ring-4">
+            Good choice
+          </button>
+          <button
+            onClick={() => submitAnalytics(false)}
+            className="ml-1 mr-1 text-white normal-case bg-red-600 border-none btn hover:bg-red-700 ring-red-400 hover:ring-4">
+            Bad choice
+          </button>
+        </div>
+      )}
+      <Food foodList={memoizedFoodList} favorite={favoriteData?.data}></Food>
     </Layout>
   );
 }
@@ -109,9 +167,16 @@ export const getStaticProps: GetStaticProps = async () => {
   const entries = await prisma.food.findMany();
   const fallbackData: ApiResponse = { status: 'Success', data: entries };
 
+  const favorites = await prisma.favorite.findMany();
+  const fallbackFavoritesData: ApiResponse<favorite[]> = {
+    status: 'Success',
+    data: favorites,
+  };
+
   return {
     props: {
       fallbackData,
+      fallbackFavoritesData,
     },
     revalidate: 60,
   };

@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [14.x, 16.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -20,19 +20,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-
-    - name: Cache node modules
-      id: cache-nodemodules
-      uses: actions/cache@v2
-      env:
-        cache-name: cache-node-modules
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
 
     - name: Cache next build
       uses: actions/cache@v2
@@ -43,21 +30,39 @@ jobs:
         path: .next/cache
         key: ${{ runner.os }}-build-${{ env.cache-name }}
 
-    - name: Install yarn
-      run: npm install -g yarn
+    - name: Set up pnpm
+      uses: pnpm/action-setup@v2.2.2
+      with:
+        version: 7.1.7
+        run_install: false
+
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      run: |
+        echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
+
+    - uses: actions/cache@v3
+      name: Setup pnpm cache
+      with:
+        path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
 
     - name: Install dependencies
-      if: steps.cache-nodemodules.outputs.cache-hit != 'true'
-      run: yarn install --frozen-lockfile
+      run: pnpm i --frozen-lockfile
+
+    - name: Generate prisma schema
+      run: pnpm exec prisma generate
 
     - name: Format
-      run: yarn format
+      run: pnpm format
 
     - name: Lint
-      run: yarn lint
+      run: pnpm lint
 
     - name: Build
-      run: yarn build
+      run: pnpm build
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
 #   - run: yarn test

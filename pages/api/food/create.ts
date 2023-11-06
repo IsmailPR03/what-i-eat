@@ -4,7 +4,6 @@ import { getSession } from 'next-auth/react';
 import prisma from '@/lib/prisma';
 
 import type { ApiResponse } from '@/types/apiResponse';
-import type { Food } from '@/types/food';
 
 export default async function handle(
   req: NextApiRequest,
@@ -17,8 +16,7 @@ export default async function handle(
     return;
   }
 
-  const { name, image, cheeseometer, deliverable, nutrition, effort } =
-    req.body;
+  const { name, image, cheeseometer, deliverable, tags, effort } = req.body;
 
   if (req.method !== 'POST') {
     return res.status(405).json('Only POST method allowed');
@@ -30,9 +28,9 @@ export default async function handle(
       image: image,
       cheeseometer: cheeseometer,
       deliverable: deliverable,
-      nutrition: nutrition,
+      tags: tags,
       effort: effort,
     },
   });
-  res.json({ status: 'success', data: result as unknown as Food[] });
+  res.json({ status: 'success', data: [result] });
 }
