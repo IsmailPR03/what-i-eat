@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [18.x]
 
     steps:
     - uses: actions/checkout@v3
@@ -33,7 +33,7 @@ jobs:
     - name: Set up pnpm
       uses: pnpm/action-setup@v2.2.2
       with:
-        version: 7.13.2
+        version: 8.6.9
         run_install: false
 
     - name: Get pnpm store directory

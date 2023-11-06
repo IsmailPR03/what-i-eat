@@ -1,31 +1,31 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["referentialIntegrity"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider             = "mysql"
-  url                  = env("DATABASE_URL")
-  referentialIntegrity = "prisma"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model food {
-  id           Int     @id @unique @default(autoincrement())
+  id           Int     @id @unique @default(autoincrement()) @db.UnsignedInt
   name         String  @unique @db.VarChar(255)
   image        String  @default("") @db.VarChar(1000)
-  cheeseometer Int
+  cheeseometer Int     @db.UnsignedInt
   deliverable  Boolean
   tags         String?
-  effort       Int
+  effort       Int     @db.UnsignedInt
 }
 
 model favorite {
-  id   Int    @id
+  id   Int    @id @db.UnsignedInt
   user String
+
+  @@index([user], name: "user")
 }
 
 model analytics {
-  id     Int     @id @unique @default(autoincrement())
+  id     Int     @id @unique @default(autoincrement()) @db.UnsignedInt
   name   String  @db.VarChar(255)
   picked Boolean
 }
