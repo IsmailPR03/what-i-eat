@@ -14,8 +14,8 @@ export default async function handle(
   const foodId = req.query.id;
   const { name, image, cheeseometer, deliverable, tags, effort } = req.body;
 
-  if (session && !session.isAdmin) {
-    res.status(401).json({ message: 'Failed. Not authenticated' });
+  if (session && !session.user.isAdmin) {
+    res.status(401).json({ message: 'Unsufficient permissions' });
     return;
   }
 
@@ -23,12 +23,16 @@ export default async function handle(
     return res.status(405).json({ message: 'Only PUT method allowed' });
   }
 
-  const item = await prisma.food.findUnique({ where: { id: Number(foodId) } });
+  const item = await prisma.food.findMany({ where: { id: Number(foodId) } });
 
   if (!item) {
-    return res
-      .status(400)
-      .json({ message: `Food with id ${foodId} not found` });
+    return res.status(400).json({ message: `Food '${foodId}' not found` });
+  }
+
+  const existingFoodByName = await prisma.food.findFirst({ where: { name } });
+
+  if (existingFoodByName && existingFoodByName.id !== Number(foodId)) {
+    return res.status(400).json({ message: `Food '${name}' already exists` });
   }
 
   const result = await prisma.food.update({

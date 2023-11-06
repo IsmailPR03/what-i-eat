@@ -14,11 +14,9 @@ import Layout from '@/components/layout';
 
 const DashboardFood = dynamic(() => import('@/components/dashboard/food'), {
   suspense: true,
-  ssr: false,
 });
 const CreateFood = dynamic(() => import('@/components/dashboard/createFood'), {
   suspense: true,
-  ssr: false,
 });
 
 import type { GetStaticProps, NextPage } from 'next';
@@ -50,7 +48,7 @@ const Dashboard: NextPage<{
     return <Layout>Loading or not authenticated...</Layout>;
   }
 
-  if (session && !session.isAdmin) {
+  if (session && !session.user.isAdmin) {
     return (
       <Layout>
         <div className="m-10">Unauthorized</div>

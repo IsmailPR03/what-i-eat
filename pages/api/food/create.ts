@@ -12,23 +12,23 @@ export default async function handle(
 ) {
   const session = await unstable_getServerSession(req, res, authOptions);
 
-  if (session && !session.isAdmin) {
-    res.status(401).json({ message: 'Failed. Not authenticated' });
+  if (session && !session.user.isAdmin) {
+    res.status(401).json({ message: 'Unsufficient permissions' });
     return;
   }
 
   const { name, image, cheeseometer, deliverable, tags, effort } = req.body;
-
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Only POST method allowed' });
   }
 
-  const existingFood = await prisma.food.findUnique({
+  const existingFood = await prisma.food.findFirst({
     where: { name },
   });
 
   if (existingFood) {
-    return res.status(400).json({ message: 'Failed. Food already exists' });
+    console.log(name);
+    return res.status(400).json({ message: `Food '${name}' already exists` });
   }
 
   const result = await prisma.food.create({

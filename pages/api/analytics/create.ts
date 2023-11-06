@@ -14,7 +14,7 @@ export default async function handle(
   const session = await unstable_getServerSession(req, res, authOptions);
 
   if (!session) {
-    res.status(401).json({ message: 'Failed. Not authenticated' });
+    res.status(401).json({ message: 'Unsufficient permissions' });
     return;
   }
 
@@ -28,7 +28,7 @@ export default async function handle(
     name = String(name);
     picked = Boolean(picked);
   } catch (e) {
-    return res.status(400).json({ message: 'Failed. Invalid request' });
+    return res.status(400).json({ message: 'Bad request' });
   }
 
   const existingFood = await prisma.food.findUnique({
@@ -38,7 +38,7 @@ export default async function handle(
   });
 
   if (!existingFood) {
-    return res.status(400).json({ message: 'Failed. Food does not exist' });
+    return res.status(400).json({ message: 'Food does not exist' });
   }
 
   await res.revalidate('/analytics');
@@ -49,5 +49,6 @@ export default async function handle(
       picked,
     },
   });
+
   res.json({ status: 'success', data: result });
 }
